@@ -345,67 +345,67 @@ export default function FocusPlayer({
           </div>
 
           {/* Revision Status Controller Bar */}
-          <div className="mt-4 p-4 rounded-2xl glass-card border border-slate-800 flex flex-wrap items-center justify-between gap-4">
+          <div className="mt-4 p-3.5 sm:p-4 rounded-2xl glass-card border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
             <div>
-              <span className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">
+              <span className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-0.5">
                 Study / Revision Status
               </span>
-              <p className="text-xs text-slate-400">
-                Mark your current comprehension level for this video
+              <p className="text-[11px] sm:text-xs text-slate-400">
+                Mark your comprehension level for this video
               </p>
             </div>
 
-            {/* Revision Pills */}
-            <div className="flex flex-wrap items-center gap-2">
+            {/* Revision Pills: 2x2 grid on mobile, row on tablet/desktop */}
+            <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 w-full sm:w-auto">
               <button
                 type="button"
                 onClick={() => handleSetRevisionStatus('need_revise')}
-                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                className={`flex items-center justify-center gap-1.5 px-3 py-2.5 sm:py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                   revisionStatus === 'need_revise'
-                    ? 'bg-rose-600 text-white shadow-md glow-rose scale-105'
+                    ? 'bg-rose-600 text-white shadow-md glow-rose'
                     : 'bg-rose-950/40 text-rose-300 border border-rose-800/40 hover:bg-rose-900/60'
                 }`}
               >
-                <span className="w-2 h-2 rounded-full bg-rose-400 animate-pulse" />
-                <span>Need Revision</span>
+                <span className="w-2 h-2 rounded-full bg-rose-400 animate-pulse shrink-0" />
+                <span>Need Revise</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => handleSetRevisionStatus('slight_revision')}
-                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                className={`flex items-center justify-center gap-1.5 px-3 py-2.5 sm:py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                   revisionStatus === 'slight_revision'
-                    ? 'bg-amber-600 text-white shadow-md glow-amber scale-105'
+                    ? 'bg-amber-600 text-white shadow-md glow-amber'
                     : 'bg-amber-950/40 text-amber-300 border border-amber-800/40 hover:bg-amber-900/60'
                 }`}
               >
-                <span className="w-2 h-2 rounded-full bg-amber-400" />
-                <span>Slight Revision</span>
+                <span className="w-2 h-2 rounded-full bg-amber-400 shrink-0" />
+                <span>Slight Revise</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => handleSetRevisionStatus('done')}
-                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                className={`flex items-center justify-center gap-1.5 px-3 py-2.5 sm:py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                   revisionStatus === 'done'
-                    ? 'bg-emerald-600 text-white shadow-md glow-emerald scale-105'
+                    ? 'bg-emerald-600 text-white shadow-md glow-emerald'
                     : 'bg-emerald-950/40 text-emerald-300 border border-emerald-800/40 hover:bg-emerald-900/60'
                 }`}
               >
-                <CheckCircle2 className="w-3.5 h-3.5" />
-                <span>Done / Mastered</span>
+                <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                <span>Done</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => handleSetRevisionStatus('unwatched')}
-                className={`px-2.5 py-2 rounded-xl text-xs font-medium transition-all cursor-pointer ${
+                className={`flex items-center justify-center px-2.5 py-2.5 sm:py-2 rounded-xl text-xs font-medium transition-all cursor-pointer ${
                   revisionStatus === 'unwatched'
                     ? 'bg-slate-700 text-white border border-slate-600'
                     : 'bg-slate-900/70 text-slate-400 hover:text-slate-200'
                 }`}
               >
-                Reset Status
+                Reset
               </button>
             </div>
           </div>
@@ -511,26 +511,28 @@ export default function FocusPlayer({
                 <Bookmark className="w-3 h-3 text-indigo-400" />
                 Add Clickable Timestamp Bookmark
               </span>
-              <form onSubmit={handleAddTimestamp} className="flex gap-2">
-                <input
-                  type="text"
-                  placeholder="03:45"
-                  value={timestampInput}
-                  onChange={(e) => setTimestampInput(e.target.value)}
-                  className="w-20 px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-xs font-mono text-white text-center outline-none focus:border-indigo-500"
-                />
-                <input
-                  type="text"
-                  placeholder="Topic/Concept (e.g. Formula derivation)"
-                  value={timestampLabel}
-                  onChange={(e) => setTimestampLabel(e.target.value)}
-                  className="flex-1 px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-xs text-white outline-none focus:border-indigo-500"
-                />
+              <form onSubmit={handleAddTimestamp} className="flex flex-col sm:flex-row gap-2">
+                <div className="flex gap-2 flex-1">
+                  <input
+                    type="text"
+                    placeholder="03:45"
+                    value={timestampInput}
+                    onChange={(e) => setTimestampInput(e.target.value)}
+                    className="w-20 px-2.5 py-2 sm:py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-xs font-mono text-white text-center outline-none focus:border-indigo-500"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Topic/Concept (e.g. Formula)"
+                    value={timestampLabel}
+                    onChange={(e) => setTimestampLabel(e.target.value)}
+                    className="flex-1 px-3 py-2 sm:py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-xs text-white outline-none focus:border-indigo-500"
+                  />
+                </div>
                 <button
                   type="submit"
-                  className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold cursor-pointer shrink-0"
+                  className="w-full sm:w-auto px-4 py-2 sm:py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold cursor-pointer shrink-0"
                 >
-                  + Add
+                  + Add Bookmark
                 </button>
               </form>
 

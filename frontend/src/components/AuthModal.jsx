@@ -43,7 +43,7 @@ export default function AuthModal() {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
       <div 
-        className="relative w-full max-w-md p-8 overflow-hidden rounded-2xl glass-panel shadow-2xl border border-slate-700/60 bg-[#0f172a]/90 text-slate-100"
+        className="relative w-full max-w-md p-5 sm:p-8 max-h-[90vh] overflow-y-auto rounded-2xl glass-panel shadow-2xl border border-slate-700/60 bg-[#0f172a] text-slate-100 mx-2"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Glow accent */}

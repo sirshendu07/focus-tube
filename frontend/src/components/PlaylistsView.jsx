@@ -112,7 +112,7 @@ export default function PlaylistsView({
         </div>
 
         {categories.length > 2 && (
-          <div className="flex gap-1.5 overflow-x-auto pb-1">
+          <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
             {categories.map(cat => (
               <button
                 key={cat}
@@ -251,7 +251,7 @@ export default function PlaylistsView({
       {/* Create Playlist Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
-          <div className="relative w-full max-w-md p-6 rounded-2xl glass-panel shadow-2xl border border-slate-700 bg-[#0f172a] text-slate-100">
+          <div className="relative w-full max-w-md p-5 sm:p-6 rounded-2xl glass-panel shadow-2xl border border-slate-700 bg-[#0f172a] text-slate-100 max-h-[90vh] overflow-y-auto mx-2">
             <h2 className="text-xl font-bold text-white mb-2">Create New Study Track</h2>
             <p className="text-xs text-slate-400 mb-4">
               Group related lectures or tutorials into a unified study collection.

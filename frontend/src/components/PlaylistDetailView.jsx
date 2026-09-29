@@ -205,16 +205,16 @@ export default function PlaylistDetailView({
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
         <h2 className="text-base font-bold text-white flex items-center gap-2">
           <span>Videos in this Track</span>
           <span className="text-xs text-slate-500 font-normal font-mono">({filteredVideos.length})</span>
         </h2>
 
-        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-900 border border-slate-800 text-xs">
+        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-900 border border-slate-800 text-xs overflow-x-auto no-scrollbar w-full sm:w-auto">
           <button
             onClick={() => setFilterStatus('all')}
-            className={`px-3 py-1 rounded-lg cursor-pointer transition-all ${
+            className={`px-3 py-1.5 rounded-lg cursor-pointer whitespace-nowrap transition-all ${
               filterStatus === 'all' ? 'bg-indigo-600 text-white font-semibold' : 'text-slate-400 hover:text-white'
             }`}
           >
@@ -222,7 +222,7 @@ export default function PlaylistDetailView({
           </button>
           <button
             onClick={() => setFilterStatus('need_revise')}
-            className={`px-3 py-1 rounded-lg cursor-pointer transition-all ${
+            className={`px-3 py-1.5 rounded-lg cursor-pointer whitespace-nowrap transition-all ${
               filterStatus === 'need_revise' ? 'bg-rose-600 text-white font-semibold' : 'text-slate-400 hover:text-rose-300'
             }`}
           >
@@ -230,7 +230,7 @@ export default function PlaylistDetailView({
           </button>
           <button
             onClick={() => setFilterStatus('slight_revision')}
-            className={`px-3 py-1 rounded-lg cursor-pointer transition-all ${
+            className={`px-3 py-1.5 rounded-lg cursor-pointer whitespace-nowrap transition-all ${
               filterStatus === 'slight_revision' ? 'bg-amber-600 text-white font-semibold' : 'text-slate-400 hover:text-amber-300'
             }`}
           >
@@ -238,7 +238,7 @@ export default function PlaylistDetailView({
           </button>
           <button
             onClick={() => setFilterStatus('done')}
-            className={`px-3 py-1 rounded-lg cursor-pointer transition-all ${
+            className={`px-3 py-1.5 rounded-lg cursor-pointer whitespace-nowrap transition-all ${
               filterStatus === 'done' ? 'bg-emerald-600 text-white font-semibold' : 'text-slate-400 hover:text-emerald-300'
             }`}
           >
@@ -319,13 +319,13 @@ export default function PlaylistDetailView({
                   </div>
                 </div>
 
-                {/* Right controls: Revision Status Selector & Delete */}
-                <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
+                {/* Controls: Revision Status Selector & Delete */}
+                <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto pt-2.5 sm:pt-0 border-t border-slate-800/80 sm:border-0 shrink-0">
                   <select
                     value={vid.revisionStatus || 'unwatched'}
                     onChange={(e) => handleUpdateStatus(vid._id, e.target.value, e)}
                     onClick={(e) => e.stopPropagation()}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold border outline-none cursor-pointer ${
+                    className={`flex-1 sm:flex-none px-3 py-2 sm:py-1.5 rounded-xl text-xs font-bold border outline-none cursor-pointer ${
                       vid.revisionStatus === 'need_revise'
                         ? 'bg-rose-950/70 border-rose-500/80 text-rose-300'
                         : vid.revisionStatus === 'slight_revision'

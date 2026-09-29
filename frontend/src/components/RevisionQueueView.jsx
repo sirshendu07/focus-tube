@@ -82,70 +82,70 @@ export default function RevisionQueueView({
         </p>
       </div>
 
-      {/* Metrics Counter Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+      {/* Metrics Counter Cards (Compact 3-column layout on mobile) */}
+      <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-6">
         <div 
           onClick={() => setFilter('need_revise')}
-          className={`p-4 rounded-2xl glass-card border transition-all cursor-pointer ${
+          className={`p-2.5 sm:p-4 rounded-xl sm:rounded-2xl glass-card border transition-all cursor-pointer ${
             filter === 'need_revise' 
               ? 'border-rose-500/80 bg-rose-950/20' 
               : 'border-slate-800 hover:border-slate-700'
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-rose-300">
-              Need Revision
+            <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-rose-300 truncate">
+              Need Revise
             </span>
-            <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse" />
+            <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-rose-500 animate-pulse shrink-0 ml-1" />
           </div>
-          <div className="text-3xl font-extrabold text-white mt-2">
+          <div className="text-xl sm:text-3xl font-extrabold text-white mt-1 sm:mt-2">
             {stats?.needRevise || 0}
           </div>
-          <p className="text-[11px] text-slate-400 mt-1">
+          <p className="text-[10px] sm:text-[11px] text-slate-400 mt-0.5 sm:mt-1 hidden sm:block">
             Topics requiring deep re-study or practice
           </p>
         </div>
 
         <div 
           onClick={() => setFilter('slight_revision')}
-          className={`p-4 rounded-2xl glass-card border transition-all cursor-pointer ${
+          className={`p-2.5 sm:p-4 rounded-xl sm:rounded-2xl glass-card border transition-all cursor-pointer ${
             filter === 'slight_revision' 
               ? 'border-amber-500/80 bg-amber-950/20' 
               : 'border-slate-800 hover:border-slate-700'
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-amber-300">
-              Slight Revision
+            <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-amber-300 truncate">
+              Slight Revise
             </span>
-            <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
+            <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-amber-500 shrink-0 ml-1" />
           </div>
-          <div className="text-3xl font-extrabold text-white mt-2">
+          <div className="text-xl sm:text-3xl font-extrabold text-white mt-1 sm:mt-2">
             {stats?.slightRevision || 0}
           </div>
-          <p className="text-[11px] text-slate-400 mt-1">
+          <p className="text-[10px] sm:text-[11px] text-slate-400 mt-0.5 sm:mt-1 hidden sm:block">
             Quick 5-minute memory refreshers
           </p>
         </div>
 
         <div 
           onClick={() => setFilter('done')}
-          className={`p-4 rounded-2xl glass-card border transition-all cursor-pointer ${
+          className={`p-2.5 sm:p-4 rounded-xl sm:rounded-2xl glass-card border transition-all cursor-pointer ${
             filter === 'done' 
               ? 'border-emerald-500/80 bg-emerald-950/20' 
               : 'border-slate-800 hover:border-slate-700'
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-emerald-300">
-              Mastered / Done
+            <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-emerald-300 truncate">
+              Done
             </span>
-            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+            <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-400 shrink-0 ml-1" />
           </div>
-          <div className="text-3xl font-extrabold text-white mt-2">
+          <div className="text-xl sm:text-3xl font-extrabold text-white mt-1 sm:mt-2">
             {stats?.done || 0}
           </div>
-          <p className="text-[11px] text-slate-400 mt-1">
+          <p className="text-[10px] sm:text-[11px] text-slate-400 mt-0.5 sm:mt-1 hidden sm:block">
             Videos completely understood
           </p>
         </div>
@@ -153,7 +153,7 @@ export default function RevisionQueueView({
 
       {/* Filter Tabs & Search */}
       <div className="flex flex-col sm:flex-row gap-3 items-center justify-between mb-6">
-        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-900 border border-slate-800 text-xs w-full sm:w-auto overflow-x-auto">
+        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-900 border border-slate-800 text-xs w-full sm:w-auto overflow-x-auto no-scrollbar">
           <button
             onClick={() => setFilter('all_revise')}
             className={`px-3 py-1.5 rounded-lg cursor-pointer whitespace-nowrap transition-all ${

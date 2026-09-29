@@ -3,6 +3,7 @@
 @layer base {
   * {
     box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
   }
   body {
     background-color: #090d16;
@@ -10,13 +11,14 @@
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 }
 
-/* Custom scrollbar */
+/* Custom scrollbar for desktop */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 ::-webkit-scrollbar-track {
   background: #090d16;
@@ -29,16 +31,25 @@
   background: #334155;
 }
 
+/* Hide scrollbar for mobile swipe rows */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 /* Glassmorphism helpers */
 .glass-panel {
-  background: rgba(15, 23, 42, 0.75);
+  background: rgba(15, 23, 42, 0.85);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .glass-card {
-  background: rgba(22, 30, 49, 0.65);
+  background: rgba(22, 30, 49, 0.75);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.07);
@@ -58,4 +69,9 @@
 
 .glow-rose {
   box-shadow: 0 0 30px -5px rgba(244, 63, 94, 0.25);
+}
+
+/* Touch safe area utility */
+.safe-bottom {
+  padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
 }

@@ -244,32 +244,33 @@ export default function App() {
         stats={stats}
       />
 
-      {/* Main Content Area */}
-      <main className="flex-1 pb-16">
+      {/* Main Content Area (extra bottom padding on mobile for thumb navigation) */}
+      <main className="flex-1 pb-24 md:pb-12">
         
-        {/* Instant Paste Header Bar (Visible on Player view if user wants to quickly paste a URL) */}
+        {/* Instant Paste Header Bar */}
         {activeView === 'player' && (
-          <div className="border-b border-slate-800/80 bg-slate-900/40 py-3 px-4 sm:px-6">
+          <div className="border-b border-slate-800/80 bg-slate-900/40 py-2.5 sm:py-3 px-3 sm:px-6">
             <div className="max-w-4xl mx-auto">
               <form onSubmit={handleInstantWatch} className="flex gap-2">
                 <input
                   type="text"
-                  placeholder="Paste any YouTube URL (e.g. https://www.youtube.com/watch?v=...)"
+                  placeholder="Paste any YouTube URL (watch, live, shorts, share link)..."
                   value={instantUrl}
                   onChange={(e) => setInstantUrl(e.target.value)}
-                  className="flex-1 px-4 py-2 text-xs sm:text-sm rounded-xl bg-slate-950 border border-slate-700/80 text-white placeholder-slate-500 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+                  className="flex-1 min-w-0 px-3.5 sm:px-4 py-2 text-xs sm:text-sm rounded-xl bg-slate-950 border border-slate-700/80 text-white placeholder-slate-500 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
                 />
                 <button
                   type="submit"
                   disabled={instantLoading}
-                  className="px-4 sm:px-6 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-semibold text-xs sm:text-sm shadow-md glow-indigo flex items-center gap-1.5 cursor-pointer disabled:opacity-50 shrink-0"
+                  className="px-3.5 sm:px-6 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-semibold text-xs sm:text-sm shadow-md glow-indigo flex items-center gap-1.5 cursor-pointer disabled:opacity-50 shrink-0"
                 >
                   {instantLoading ? (
                     <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   ) : (
                     <>
-                      <Play className="w-3.5 h-3.5 fill-white" />
-                      <span>Watch Distraction-Free</span>
+                      <Play className="w-3.5 h-3.5 fill-white shrink-0" />
+                      <span className="hidden sm:inline">Watch Distraction-Free</span>
+                      <span className="sm:hidden text-xs">Watch</span>
                     </>
                   )}
                 </button>
@@ -321,7 +322,7 @@ export default function App() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-slate-800/80 bg-slate-950 py-6 text-center text-xs text-slate-500">
+      <footer className="border-t border-slate-800/80 bg-slate-950 py-6 text-center text-xs text-slate-500 mb-14 md:mb-0">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <span className="font-bold text-slate-400">FocusTube</span>

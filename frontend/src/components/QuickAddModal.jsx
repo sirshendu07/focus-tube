@@ -155,7 +155,7 @@ export default function QuickAddModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
       <div 
-        className="relative w-full max-w-lg p-6 sm:p-8 rounded-2xl glass-panel shadow-2xl border border-slate-700/80 bg-[#0f172a] text-slate-100 max-h-[90vh] overflow-y-auto"
+        className="relative w-full max-w-lg p-5 sm:p-8 rounded-2xl glass-panel shadow-2xl border border-slate-700/80 bg-[#0f172a] text-slate-100 max-h-[88vh] overflow-y-auto mx-2"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Glow */}
@@ -217,11 +217,11 @@ export default function QuickAddModal({
 
           {/* Video Preview Card if detected */}
           {previewData && (
-            <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800 flex gap-3 items-center">
+            <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800 flex flex-col sm:flex-row gap-3 items-start sm:items-center">
               <img
                 src={previewData.thumbnailUrl}
                 alt="Thumbnail"
-                className="w-24 h-16 object-cover rounded-lg border border-slate-700 shrink-0"
+                className="w-full sm:w-28 aspect-video object-cover rounded-lg border border-slate-700 shrink-0"
               />
               <div className="min-w-0 flex-1">
                 <p className="text-xs font-semibold text-white line-clamp-2 leading-tight">
