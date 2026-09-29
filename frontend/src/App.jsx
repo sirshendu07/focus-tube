@@ -8,6 +8,7 @@ import PlaylistDetailView from './components/PlaylistDetailView';
 import RevisionQueueView from './components/RevisionQueueView';
 import QuickAddModal from './components/QuickAddModal';
 import AuthModal from './components/AuthModal';
+import { extractYouTubeId } from './utils/youtube';
 import { Play, Sparkles, Tv, Layers, RotateCcw, ShieldCheck, CheckCircle2 } from 'lucide-react';
 
 export default function App() {
@@ -142,27 +143,68 @@ export default function App() {
   // Quick Watch without saving (or guest preview)
   const handleInstantWatch = async (e) => {
     e.preventDefault();
-    if (!instantUrl.trim()) return;
+    const raw = instantUrl.trim();
+    if (!raw) return;
+
+    setInstantError('');
+
+    const youtubeId = extractYouTubeId(raw);
+    if (!youtubeId) {
+      if (raw.includes('playlist?list=') || raw.includes('/playlist')) {
+        setInstantError('This is a playlist URL. Please open any video in the playlist and paste its link.');
+      } else {
+        setInstantError('Could not detect a valid YouTube video in this link. Please check and try again.');
+      }
+      return;
+    }
 
     setInstantLoading(true);
-    setInstantError('');
 
     try {
       if (isAuthenticated) {
         // Automatically save and open in FocusPlayer
-        const newVideo = await api.createVideo({ url: instantUrl.trim() });
-        setInstantUrl('');
-        handleVideoAdded(newVideo);
+        try {
+          const newVideo = await api.createVideo({ url: raw });
+          setInstantUrl('');
+          handleVideoAdded(newVideo);
+        } catch (saveErr) {
+          // If already in collection or other error, still play it directly
+          if (saveErr.data?.existingVideo) {
+            handlePlayVideo(saveErr.data.existingVideo);
+            setInstantUrl('');
+          } else {
+            const preview = await api.previewVideo(raw).catch(() => ({
+              youtubeId,
+              title: `YouTube Video (${youtubeId})`,
+              channelTitle: 'YouTube Creator',
+              thumbnailUrl: `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`
+            }));
+            const tempVideo = {
+              _id: 'view-' + Date.now(),
+              youtubeId,
+              youtubeUrl: raw.startsWith('http') ? raw : `https://www.youtube.com/watch?v=${youtubeId}`,
+              title: preview.title || `YouTube Video (${youtubeId})`,
+              channelTitle: preview.channelTitle || 'YouTube Creator',
+              thumbnailUrl: preview.thumbnailUrl || `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`,
+              revisionStatus: 'unwatched',
+              notes: '',
+              timestamps: []
+            };
+            setCurrentVideo(tempVideo);
+            setPlaylistVideos([tempVideo]);
+            setActiveView('player');
+            setInstantUrl('');
+          }
+        }
       } else {
-        // Guest mode: extract youtubeId and preview immediately
-        const preview = await api.previewVideo(instantUrl.trim());
+        // Guest mode: extract youtubeId and start playing immediately
         const tempVideo = {
           _id: 'guest-' + Date.now(),
-          youtubeId: preview.youtubeId,
-          youtubeUrl: instantUrl.trim(),
-          title: preview.title,
-          channelTitle: preview.channelTitle,
-          thumbnailUrl: preview.thumbnailUrl,
+          youtubeId,
+          youtubeUrl: raw.startsWith('http') ? raw : `https://www.youtube.com/watch?v=${youtubeId}`,
+          title: `YouTube Video (${youtubeId})`,
+          channelTitle: 'YouTube Creator',
+          thumbnailUrl: `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`,
           revisionStatus: 'unwatched',
           notes: '',
           timestamps: []
@@ -171,6 +213,18 @@ export default function App() {
         setPlaylistVideos([tempVideo]);
         setActiveView('player');
         setInstantUrl('');
+
+        // Try to enrich metadata in background without blocking player
+        api.previewVideo(raw).then(preview => {
+          if (preview && preview.title) {
+            setCurrentVideo(prev => prev?._id === tempVideo._id ? {
+              ...prev,
+              title: preview.title,
+              channelTitle: preview.channelTitle,
+              thumbnailUrl: preview.thumbnailUrl
+            } : prev);
+          }
+        }).catch(() => {});
       }
     } catch (err) {
       setInstantError(err.message || 'Invalid YouTube URL. Please check and try again.');

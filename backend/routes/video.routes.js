@@ -5,20 +5,25 @@ const Playlist = require('../models/Playlist');
 const auth = require('../middleware/auth');
 const { extractYouTubeId, fetchYouTubeMetadata } = require('../utils/youtube');
 
-// All video routes require authentication
-router.use(auth);
-
-// Preview YouTube URL before saving
+// Public preview endpoint (no auth required so visitors can preview immediately)
 router.get('/preview', async (req, res) => {
   try {
     const { url } = req.query;
-    if (!url) {
+    if (!url || !url.trim()) {
       return res.status(400).json({ message: 'URL query parameter is required.' });
     }
 
-    const youtubeId = extractYouTubeId(url);
+    const trimmedUrl = url.trim();
+    const youtubeId = extractYouTubeId(trimmedUrl);
     if (!youtubeId) {
-      return res.status(400).json({ message: 'Invalid YouTube URL or Video ID provided.' });
+      if (trimmedUrl.includes('playlist?list=') || trimmedUrl.includes('/playlist')) {
+        return res.status(400).json({ 
+          message: 'This is a YouTube playlist link. Please open any video in the playlist and paste its URL to watch or add it.' 
+        });
+      }
+      return res.status(400).json({ 
+        message: 'Could not find a valid YouTube video in this link. Please check the URL and try again.' 
+      });
     }
 
     const meta = await fetchYouTubeMetadata(youtubeId);
@@ -31,6 +36,9 @@ router.get('/preview', async (req, res) => {
     return res.status(500).json({ message: 'Failed to fetch video preview.' });
   }
 });
+
+// All following video routes require authentication
+router.use(auth);
 
 // List videos with filters (e.g. by status, playlistId, search)
 router.get('/', async (req, res) => {
@@ -78,7 +86,12 @@ router.post('/', async (req, res) => {
 
     const youtubeId = extractYouTubeId(url);
     if (!youtubeId) {
-      return res.status(400).json({ message: 'Could not detect a valid YouTube Video ID from the link.' });
+      if (url.includes('playlist?list=') || url.includes('/playlist')) {
+        return res.status(400).json({ 
+          message: 'This is a YouTube playlist link. Please open any video in the playlist and paste its URL.' 
+        });
+      }
+      return res.status(400).json({ message: 'Could not detect a valid YouTube Video ID from the link. Please check the URL.' });
     }
 
     // Check if user already added this video to the same playlist

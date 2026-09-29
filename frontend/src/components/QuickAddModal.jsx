@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { X, Video, Plus, Sparkles, Check, Play, FolderPlus } from 'lucide-react';
+import { extractYouTubeId } from '../utils/youtube';
 
 export default function QuickAddModal({
   isOpen,
@@ -31,30 +32,55 @@ export default function QuickAddModal({
     }
   }, [defaultPlaylistId]);
 
-  // Debounce or preview on url change
+  // Real-time URL validation and resilient preview
   useEffect(() => {
-    if (!url.trim()) {
+    const raw = url.trim();
+    if (!raw) {
       setPreviewData(null);
       setError('');
       return;
     }
 
+    const youtubeId = extractYouTubeId(raw);
+    if (!youtubeId) {
+      setPreviewData(null);
+      if (raw.includes('playlist?list=') || raw.includes('/playlist')) {
+        setError('This is a playlist URL. Please open any video in the playlist and paste its URL.');
+      } else if (raw.length > 5) {
+        setError('Could not detect a valid YouTube video in this link. Please check the URL.');
+      } else {
+        setError('');
+      }
+      return;
+    }
+
+    // Video ID found! Clear errors and set instant fallback preview
+    setError('');
+    const instantPreview = {
+      youtubeId,
+      title: customTitle || `YouTube Video (${youtubeId})`,
+      channelTitle: 'YouTube Creator',
+      thumbnailUrl: `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`
+    };
+    setPreviewData(instantPreview);
+
+    // Asynchronously enrich with real title & channel from oEmbed
+    setLoadingPreview(true);
     const timer = setTimeout(async () => {
-      setLoadingPreview(true);
-      setError('');
       try {
-        const preview = await api.previewVideo(url.trim());
-        setPreviewData(preview);
-        if (!customTitle) {
-          setCustomTitle(preview.title);
+        const preview = await api.previewVideo(raw);
+        if (preview && preview.title) {
+          setPreviewData(preview);
+          if (!customTitle) {
+            setCustomTitle(preview.title);
+          }
         }
       } catch (err) {
-        setPreviewData(null);
-        setError('Could not preview this link. Please ensure it is a valid YouTube video URL or ID.');
+        // oEmbed enrichment error is non-fatal: user can still save and watch with default title & thumbnail
       } finally {
         setLoadingPreview(false);
       }
-    }, 600);
+    }, 400);
 
     return () => clearTimeout(timer);
   }, [url]);
@@ -113,7 +139,14 @@ export default function QuickAddModal({
         onVideoAdded(newVideo);
       }
     } catch (err) {
-      setError(err.message || 'Failed to save video. Please try again.');
+      if (err.data?.existingVideo) {
+        onClose();
+        if (onVideoAdded) {
+          onVideoAdded(err.data.existingVideo);
+        }
+      } else {
+        setError(err.message || 'Failed to save video. Please check the link and try again.');
+      }
     } finally {
       setSubmitting(false);
     }

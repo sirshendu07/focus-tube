@@ -1,6 +1,5 @@
 /**
- * Robust YouTube URL & Video ID Extractor
- * Handles:
+ * Extracts YouTube Video ID from any format on the client side:
  * - https://www.youtube.com/watch?v=VIDEO_ID
  * - https://youtu.be/VIDEO_ID
  * - https://www.youtube.com/live/VIDEO_ID
@@ -8,14 +7,11 @@
  * - https://m.youtube.com/watch?v=VIDEO_ID
  * - https://www.youtube.com/shorts/VIDEO_ID
  * - https://www.youtube.com/embed/VIDEO_ID
- * - https://www.youtube-nocookie.com/embed/VIDEO_ID
- * - https://music.youtube.com/watch?v=VIDEO_ID
- * - https://www.youtube.com/attribution_link?...
  * - Direct 11-char Video ID
  * - Links with extra parameters (?si=..., &t=..., &list=..., &feature=...)
  * - URLs embedded in text or <iframe> tags
  */
-function extractYouTubeId(input) {
+export function extractYouTubeId(input) {
   if (!input || typeof input !== 'string') return null;
   let str = input.trim();
 
@@ -25,7 +21,7 @@ function extractYouTubeId(input) {
     str = srcMatch[1];
   }
 
-  // If input contains text surrounding a URL (e.g. "Check out https://youtu.be/xxx")
+  // If input contains text surrounding a URL (e.g. "Watch on YouTube: https://youtu.be/xxx")
   const urlInTextMatch = str.match(/https?:\/\/[^\s"'<>]+/i);
   if (urlInTextMatch && urlInTextMatch[0]) {
     str = urlInTextMatch[0];
@@ -96,50 +92,3 @@ function extractYouTubeId(input) {
 
   return null;
 }
-
-/**
- * Fetch video details via free YouTube oEmbed API without requiring an API key.
- */
-async function fetchYouTubeMetadata(videoId) {
-  const defaultMeta = {
-    youtubeId: videoId,
-    title: `YouTube Video (${videoId})`,
-    channelTitle: 'YouTube Creator',
-    thumbnailUrl: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
-  };
-
-  try {
-    const targetUrl = `https://www.youtube.com/watch?v=${videoId}`;
-    const oembedUrl = `https://www.youtube.com/oembed?url=${encodeURIComponent(targetUrl)}&format=json`;
-    
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 4000);
-
-    const response = await fetch(oembedUrl, {
-      signal: controller.signal,
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) FocusTube/1.0'
-      }
-    });
-    clearTimeout(timeout);
-
-    if (response.ok) {
-      const data = await response.json();
-      return {
-        youtubeId: videoId,
-        title: data.title || defaultMeta.title,
-        channelTitle: data.author_name || defaultMeta.channelTitle,
-        thumbnailUrl: data.thumbnail_url || defaultMeta.thumbnailUrl
-      };
-    }
-  } catch (err) {
-    console.warn(`oEmbed fetch fallback for ${videoId}:`, err.message);
-  }
-
-  return defaultMeta;
-}
-
-module.exports = {
-  extractYouTubeId,
-  fetchYouTubeMetadata
-};
