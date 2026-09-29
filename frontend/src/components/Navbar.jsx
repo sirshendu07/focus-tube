@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import PomodoroTimer from './PomodoroTimer';
 import { 
@@ -18,6 +18,32 @@ export default function Navbar({
 }) {
   const { user, isAuthenticated, logout, openAuth } = useAuth();
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const profileContainerRef = useRef(null);
+
+  // Close profile dropdown when touching or clicking anywhere outside or switching focus
+  useEffect(() => {
+    if (!profileDropdownOpen) return;
+
+    const handleOutsideInteraction = (e) => {
+      if (profileContainerRef.current && !profileContainerRef.current.contains(e.target)) {
+        setProfileDropdownOpen(false);
+      }
+    };
+
+    const handleWindowBlur = () => {
+      setProfileDropdownOpen(false);
+    };
+
+    document.addEventListener('pointerdown', handleOutsideInteraction);
+    document.addEventListener('touchstart', handleOutsideInteraction);
+    window.addEventListener('blur', handleWindowBlur);
+
+    return () => {
+      document.removeEventListener('pointerdown', handleOutsideInteraction);
+      document.removeEventListener('touchstart', handleOutsideInteraction);
+      window.removeEventListener('blur', handleWindowBlur);
+    };
+  }, [profileDropdownOpen]);
 
   const revisionCount = (stats?.needRevise || 0) + (stats?.slightRevision || 0);
 
@@ -120,7 +146,7 @@ export default function Navbar({
 
             {/* User Auth Menu */}
             {isAuthenticated ? (
-              <div className="relative">
+              <div ref={profileContainerRef} className="relative">
                 <button
                   onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
                   className="flex items-center gap-1 sm:gap-2 p-1 sm:p-1.5 sm:pr-2.5 rounded-xl bg-slate-900 border border-slate-700/80 hover:border-slate-600 transition-all cursor-pointer"
@@ -135,10 +161,16 @@ export default function Navbar({
                 </button>
 
                 {profileDropdownOpen && (
-                  <div 
-                    className="absolute right-0 mt-2 w-56 max-w-[calc(100vw-2rem)] p-2 rounded-2xl glass-panel shadow-2xl border border-slate-700/80 bg-[#0f172a] z-50 animate-fade-in text-slate-200"
-                    onClick={() => setProfileDropdownOpen(false)}
-                  >
+                  <>
+                    <div 
+                      className="fixed inset-0 z-40 bg-transparent" 
+                      onClick={() => setProfileDropdownOpen(false)} 
+                      onTouchStart={() => setProfileDropdownOpen(false)} 
+                    />
+                    <div 
+                      className="absolute right-0 mt-2 w-56 max-w-[calc(100vw-2rem)] p-2 rounded-2xl glass-panel shadow-2xl border border-slate-700/80 bg-[#0f172a] z-50 animate-fade-in text-slate-200"
+                      onClick={() => setProfileDropdownOpen(false)}
+                    >
                     <div className="px-3 py-2 border-b border-slate-800">
                       <p className="text-xs font-semibold text-white truncate">{user?.name}</p>
                       <p className="text-[11px] text-slate-400 truncate">{user?.email}</p>
@@ -169,6 +201,7 @@ export default function Navbar({
                       </button>
                     </div>
                   </div>
+                </>
                 )}
               </div>
             ) : (

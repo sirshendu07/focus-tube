@@ -30,18 +30,85 @@ export default function FocusPlayer({
   playlistVideos = [],
   onSelectVideo,
   onVideoUpdated,
-  onOpenQuickAdd
+  onOpenQuickAdd,
+  onOpenPlaylists
 }) {
   const [notes, setNotes] = useState(video?.notes || '');
   const [savingNotes, setSavingNotes] = useState(false);
   const [notesSaved, setNotesSaved] = useState(true);
   const [revisionStatus, setRevisionStatus] = useState(video?.revisionStatus || 'unwatched');
   const [theaterMode, setTheaterMode] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const videoWrapperRef = useRef(null);
   const [showPlaylistSidebar, setShowPlaylistSidebar] = useState(true);
   const [timestampInput, setTimestampInput] = useState('');
   const [timestampLabel, setTimestampLabel] = useState('');
   const [timestamps, setTimestamps] = useState(video?.timestamps || []);
   const [currentStartTime, setCurrentStartTime] = useState(0);
+
+  // Sync fullscreen state with browser events
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      const isFull = !!(
+        document.fullscreenElement ||
+        document.webkitFullscreenElement ||
+        document.mozFullScreenElement ||
+        document.msFullscreenElement
+      );
+      setIsFullscreen(isFull);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+    document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('MSFullscreenChange', handleFullscreenChange);
+    };
+  }, []);
+
+  const toggleFullscreen = async () => {
+    const el = videoWrapperRef.current;
+    const isCurrentlyFullscreen = isFullscreen || !!(
+      document.fullscreenElement ||
+      document.webkitFullscreenElement ||
+      document.mozFullScreenElement ||
+      document.msFullscreenElement
+    );
+
+    if (isCurrentlyFullscreen) {
+      setIsFullscreen(false);
+      try {
+        if (document.exitFullscreen) await document.exitFullscreen();
+        else if (document.webkitExitFullscreen) await document.webkitExitFullscreen();
+        else if (document.mozCancelFullScreen) await document.mozCancelFullScreen();
+        else if (document.msExitFullscreen) await document.msExitFullscreen();
+      } catch (err) {
+        console.warn('Exit fullscreen failed:', err);
+      }
+    } else {
+      setIsFullscreen(true);
+      if (el) {
+        try {
+          if (el.requestFullscreen) {
+            await el.requestFullscreen();
+          } else if (el.webkitRequestFullscreen) {
+            await el.webkitRequestFullscreen();
+          } else if (el.mozRequestFullScreen) {
+            await el.mozRequestFullScreen();
+          } else if (el.msRequestFullscreen) {
+            await el.msRequestFullscreen();
+          }
+        } catch (err) {
+          console.warn('Native fullscreen request rejected, using fullscreen CSS overlay:', err);
+        }
+      }
+    }
+  };
 
   // Sync state whenever active video changes
   useEffect(() => {
@@ -215,13 +282,23 @@ export default function FocusPlayer({
           Paste any YouTube URL to watch in high-definition without endless recommendations, comments, or distracting sidebars. Take timestamped notes & track revision status seamlessly.
         </p>
 
-        <button
-          onClick={onOpenQuickAdd}
-          className="px-8 py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-base shadow-xl glow-indigo transition-all cursor-pointer flex items-center gap-3 mx-auto"
-        >
-          <Play className="w-5 h-5 fill-white" />
-          <span>Paste YouTube Link to Watch</span>
-        </button>
+        <div className="flex flex-wrap items-center justify-center gap-3 mb-8">
+          <button
+            onClick={onOpenQuickAdd}
+            className="px-6 sm:px-8 py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm sm:text-base shadow-xl glow-indigo transition-all cursor-pointer flex items-center gap-2.5"
+          >
+            <Play className="w-4 h-4 fill-white" />
+            <span>Paste YouTube Link to Watch</span>
+          </button>
+
+          <button
+            onClick={onOpenPlaylists}
+            className="px-6 py-3.5 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-700/80 hover:border-indigo-500/50 text-slate-200 hover:text-white font-semibold text-sm sm:text-base transition-all cursor-pointer flex items-center gap-2.5 shadow-md"
+          >
+            <ListVideo className="w-4 h-4 text-indigo-400" />
+            <span>Browse My Playlists</span>
+          </button>
+        </div>
 
         <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-6 text-left">
           <div className="p-5 rounded-2xl glass-card border border-slate-800">
@@ -270,27 +347,40 @@ export default function FocusPlayer({
     <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 transition-all ${theaterMode ? 'max-w-none px-2 py-2' : ''}`}>
       
       {/* Top Bar / Navigation */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
-        <div className="flex items-center gap-3 min-w-0">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+          {/* My Playlists button */}
+          <button
+            onClick={onOpenPlaylists}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 hover:border-indigo-500/50 text-slate-200 hover:text-white text-xs font-semibold transition-all shadow-sm cursor-pointer shrink-0"
+            title="Browse all your playlists"
+          >
+            <ListVideo className="w-3.5 h-3.5 text-indigo-400" />
+            <span>My Playlists</span>
+          </button>
+
           {playlist && (
-            <span className="px-3 py-1 rounded-xl bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 text-xs font-semibold flex items-center gap-1.5 shrink-0">
-              <ListVideo className="w-3.5 h-3.5" />
-              <span>{playlist.title}</span>
+            <button
+              onClick={onOpenPlaylists}
+              className="px-2.5 py-1 rounded-xl bg-indigo-500/15 hover:bg-indigo-500/25 border border-indigo-500/30 text-indigo-300 text-xs font-semibold flex items-center gap-1.5 shrink-0 transition-colors cursor-pointer truncate max-w-[150px] sm:max-w-[220px]"
+              title={`Playlist: ${playlist.title} (click to view)`}
+            >
+              <span className="truncate">{playlist.title}</span>
               {playlistVideos.length > 0 && (
-                <span className="text-indigo-400 font-mono">
+                <span className="text-indigo-400 font-mono text-[11px]">
                   ({currentIndex + 1}/{playlistVideos.length})
                 </span>
               )}
-            </span>
+            </button>
           )}
 
-          <h2 className="text-base sm:text-lg font-bold text-white truncate max-w-xl" title={video.title}>
+          <h2 className="text-xs sm:text-base font-bold text-white truncate min-w-0" title={video.title}>
             {video.title}
           </h2>
         </div>
 
         {/* Player Actions & Playlist Prev/Next */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           {playlistVideos.length > 1 && (
             <div className="flex items-center rounded-xl bg-slate-900 border border-slate-800 p-0.5">
               <button
@@ -312,17 +402,31 @@ export default function FocusPlayer({
             </div>
           )}
 
+          {/* Dedicated Fullscreen Button (Works on Desktop & Mobile) */}
+          <button
+            onClick={toggleFullscreen}
+            className={`p-2 sm:px-3 sm:py-1.5 rounded-xl border text-xs font-medium flex items-center gap-1.5 transition-all cursor-pointer ${
+              isFullscreen 
+                ? 'bg-indigo-600 border-indigo-500 text-white shadow-md glow-indigo' 
+                : 'bg-slate-900 border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800'
+            }`}
+            title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen Video'}
+          >
+            {isFullscreen ? <Minimize2 className="w-4 h-4 text-white" /> : <Maximize2 className="w-4 h-4 text-indigo-400" />}
+            <span className="hidden sm:inline">{isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}</span>
+          </button>
+
+          {/* Desktop Theater Mode */}
           <button
             onClick={() => setTheaterMode(!theaterMode)}
-            className={`p-2 rounded-xl border text-xs font-medium flex items-center gap-1.5 transition-all cursor-pointer ${
+            className={`hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs font-medium transition-all cursor-pointer ${
               theaterMode 
-                ? 'bg-indigo-600 border-indigo-500 text-white' 
+                ? 'bg-slate-800 border-slate-700 text-indigo-300' 
                 : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800'
             }`}
             title={theaterMode ? 'Exit Theater Mode' : 'Theater / Zen Mode'}
           >
-            {theaterMode ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
-            <span className="hidden sm:inline">{theaterMode ? 'Standard' : 'Theater'}</span>
+            <span>{theaterMode ? 'Standard' : 'Theater'}</span>
           </button>
         </div>
       </div>
@@ -333,15 +437,34 @@ export default function FocusPlayer({
         {/* Left Column: Video & Revision Bar */}
         <div className={theaterMode ? 'w-full' : 'lg:col-span-8'}>
           {/* Distraction-Free Video Frame */}
-          <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-black shadow-2xl border border-slate-800">
+          <div 
+            ref={videoWrapperRef}
+            className={`relative w-full overflow-hidden bg-black shadow-2xl transition-all ${
+              isFullscreen 
+                ? 'fixed inset-0 z-[99999] w-screen h-screen rounded-none border-0 flex items-center justify-center' 
+                : 'aspect-video rounded-2xl border border-slate-800'
+            }`}
+          >
             <iframe
               key={`${video.youtubeId}-${currentStartTime}`}
               src={embedUrl}
               title={video.title}
               className="w-full h-full border-0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
               allowFullScreen
             />
+
+            {/* Exit Fullscreen Floating Button when in Fullscreen Mode */}
+            {isFullscreen && (
+              <button
+                onClick={toggleFullscreen}
+                className="absolute top-4 right-4 z-50 px-3 py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-white backdrop-blur-md shadow-2xl border border-white/20 transition-all cursor-pointer flex items-center gap-1.5"
+                title="Exit Fullscreen"
+              >
+                <Minimize2 className="w-4 h-4 text-indigo-400" />
+                <span className="text-xs font-semibold">Exit Fullscreen</span>
+              </button>
+            )}
           </div>
 
           {/* Revision Status Controller Bar */}

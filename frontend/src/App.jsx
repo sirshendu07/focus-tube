@@ -291,6 +291,7 @@ export default function App() {
             onSelectVideo={(vid) => handlePlayVideo(vid, currentPlaylist, playlistVideos)}
             onVideoUpdated={handleVideoUpdated}
             onOpenQuickAdd={() => handleOpenQuickAdd()}
+            onOpenPlaylists={() => setActiveView('playlists')}
           />
         )}
 

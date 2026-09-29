@@ -7,6 +7,32 @@ export default function PomodoroTimer({ compact = false }) {
   const [isRunning, setIsRunning] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const timerRef = useRef(null);
+  const dropdownContainerRef = useRef(null);
+
+  // Close timer dropdown when tapping outside or window loses focus
+  useEffect(() => {
+    if (!showDropdown) return;
+
+    const handleOutsideInteraction = (e) => {
+      if (dropdownContainerRef.current && !dropdownContainerRef.current.contains(e.target)) {
+        setShowDropdown(false);
+      }
+    };
+
+    const handleWindowBlur = () => {
+      setShowDropdown(false);
+    };
+
+    document.addEventListener('pointerdown', handleOutsideInteraction);
+    document.addEventListener('touchstart', handleOutsideInteraction);
+    window.addEventListener('blur', handleWindowBlur);
+
+    return () => {
+      document.removeEventListener('pointerdown', handleOutsideInteraction);
+      document.removeEventListener('touchstart', handleOutsideInteraction);
+      window.removeEventListener('blur', handleWindowBlur);
+    };
+  }, [showDropdown]);
 
   const MODES = {
     focus: { label: 'Focus Sprint', minutes: 25, color: 'text-indigo-400', bg: 'bg-indigo-500/10' },
@@ -61,7 +87,7 @@ export default function PomodoroTimer({ compact = false }) {
 
   if (compact) {
     return (
-      <div className="relative">
+      <div ref={dropdownContainerRef} className="relative">
         <button
           onClick={() => setShowDropdown(!showDropdown)}
           className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-mono font-medium transition-all cursor-pointer ${
@@ -77,7 +103,16 @@ export default function PomodoroTimer({ compact = false }) {
         </button>
 
         {showDropdown && (
-          <div className="absolute right-0 mt-2 w-64 p-4 rounded-2xl glass-panel shadow-2xl border border-slate-700/80 bg-[#0f172a] z-50 animate-fade-in text-slate-200">
+          <>
+            <div 
+              className="fixed inset-0 z-40 bg-transparent" 
+              onClick={() => setShowDropdown(false)} 
+              onTouchStart={() => setShowDropdown(false)} 
+            />
+            <div 
+              className="absolute right-0 mt-2 w-64 max-w-[calc(100vw-2rem)] p-4 rounded-2xl glass-panel shadow-2xl border border-slate-700/80 bg-[#0f172a] z-50 animate-fade-in text-slate-200"
+              onClick={(e) => e.stopPropagation()}
+            >
             <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-800">
               <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-indigo-400" /> Focus Pomodoro
@@ -139,7 +174,8 @@ export default function PomodoroTimer({ compact = false }) {
               </div>
             </div>
           </div>
-        )}
+        </>
+      )}
       </div>
     );
   }
